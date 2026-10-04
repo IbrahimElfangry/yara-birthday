@@ -1139,7 +1139,7 @@
 
   <!-- STAGE 5: Polaroid Album -->
   <div id="stage-album" class="stage">
-    <h2 class="album-title">Our Memories ❤️</h2>
+    <h2 class="album-title">Memories ❤️</h2>
     <div class="polaroid-stack" id="polaroidStack"></div>
     <div class="album-controls">
       <button class="album-btn" id="nextCardBtn">Next ➔</button>
@@ -1387,13 +1387,19 @@
     /* ═══════════════════════════════════════════════════
        STAGE 1 — MATRIX RAIN
        ═══════════════════════════════════════════════════ */
+    /* ═══════════════════════════════════════════════════
+       STAGE 1 — MATRIX RAIN
+       ═══════════════════════════════════════════════════ */
     (function initMatrix() {
       const c = $('#matrixCanvas');
+      if (!c) return;
       const ctx = c.getContext('2d');
+      if (!ctx) return;
       const fontSize = 22;
       const colGap = 32;       // horizontal spacing between columns
       const rowStep = 1.5;     // vertical spacing multiplier (1.5 × fontSize between letters)
       let cols, columns;
+      let matrixAnimId = null;
 
       // Phrases — clean English letters only
       const phrases = [
@@ -1428,7 +1434,11 @@
       addEventListener('resize', resize);
 
       function draw() {
-        if (currentStage !== 'matrix') { requestAnimationFrame(draw); return; }
+        if (currentStage !== 'matrix') {
+          if (matrixAnimId) cancelAnimationFrame(matrixAnimId);
+          c.style.display = 'none';
+          return;
+        }
 
         // Very slow fade — long soft trails
         ctx.fillStyle = 'rgba(5, 5, 8, 0.03)';
@@ -1469,19 +1479,23 @@
             }
           }
         }
-        requestAnimationFrame(draw);
+        matrixAnimId = requestAnimationFrame(draw);
       }
       draw();
 
       // Tap to begin
       const handler = (e) => {
-        e.preventDefault();
-        $('#tapPrompt').removeEventListener('click', handler);
-        $('#stage-matrix').removeEventListener('click', handler);
+        if (e) e.preventDefault();
+        const tap = $('#tapPrompt');
+        const stageMat = $('#stage-matrix');
+        if (tap) tap.removeEventListener('click', handler);
+        if (stageMat) stageMat.removeEventListener('click', handler);
         goToStage('countdown');
       };
-      $('#tapPrompt').addEventListener('click', handler);
-      $('#stage-matrix').addEventListener('click', handler);
+      const tap = $('#tapPrompt');
+      const stageMat = $('#stage-matrix');
+      if (tap) tap.addEventListener('click', handler);
+      if (stageMat) stageMat.addEventListener('click', handler);
     })();
 
     /* ═══════════════════════════════════════════════════
@@ -1489,6 +1503,10 @@
        ═══════════════════════════════════════════════════ */
     function runCountdown() {
       const el = $('#countdownNum');
+      if (!el) {
+        goToStage('starheart');
+        return;
+      }
       let n = 3;
       el.textContent = n;
       el.className = 'countdown-num';
@@ -1518,15 +1536,20 @@
     /* ═══════════════════════════════════════════════════
        STAGE 2b — STAR-HEART SEQUENCE
        ═══════════════════════════════════════════════════ */
+    let starheartAnimId = null;
+
     function runStarHeart() {
       const c = $('#starheartCanvas');
+      if (!c) return;
+      c.style.display = 'block';
       const ctx = c.getContext('2d');
+      if (!ctx) return;
       c.width = innerWidth;
       c.height = innerHeight;
 
       const cx = c.width / 2;
       const cy = c.height / 2;
-      const scale = Math.min(c.width, c.height) * 0.006;
+      const scale = Math.min(c.width, c.height) * 0.0095;
 
       // --- Generate heart outline points (finer resolution) ---
       const heartPoints = [];
@@ -1543,12 +1566,12 @@
         const offCtx = offscreen.getContext('2d');
         offscreen.width = c.width;
         offscreen.height = c.height;
-        const textSize = Math.min(c.width * 0.06, 38);
+        const textSize = Math.min(c.width * 0.08, 65);
         offCtx.font = `bold ${textSize}px 'Dancing Script', cursive`;
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
         offCtx.fillStyle = '#fff';
-        offCtx.fillText('Love You Yara', cx, cy + 10);
+        offCtx.fillText('Love You Yara', cx, cy + 15);
 
         const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height);
         const step = 4;
@@ -1595,17 +1618,12 @@
       });
 
       // --- Timing (at 60fps) ---
-      //   0–480:   Heart particles gather (~8s to fully form)
-      // 300–600:   Text particles gather (start while heart is mostly formed)
-      // 600–840:   Hold completed heart + text stable (~4s)
-      //     840:   Burst trigger
-      // 840–960:   Explosion (~2s)
       let frame = 0;
-      const heartFormFrames = 300;   // رسم القلب في 5 ثوانٍ بدلاً من 8
-      const textStartFrame = 180;    // بداية رسم النص أسرع[cite: 7]
-      const textFormFrames = 200;    // سرعة تشكيل النص[cite: 7]
-      const holdEndFrame = 400;      // مدة ثبات القلب الإجمالية (10 ثوانٍ إجمالاً قبل الانفجار)[cite: 7]
-      const burstDuration = 90;      // سرعة الانفجار[cite: 7]
+      const heartFormFrames = 300;
+      const textStartFrame = 180;
+      const textFormFrames = 200;
+      const holdEndFrame = 400;
+      const burstDuration = 90;
       let bursting = false;
       let burstStartFrame = 0;
 
@@ -1629,6 +1647,12 @@
       }
 
       function animate() {
+        if (currentStage !== 'starheart' && !bursting) {
+          if (starheartAnimId) cancelAnimationFrame(starheartAnimId);
+          c.style.display = 'none';
+          return;
+        }
+
         frame++;
 
         // Minimal fade to keep particles bright and persistent
@@ -1704,11 +1728,13 @@
 
         // --- Check burst completion ---
         if (bursting && (frame - burstStartFrame) > burstDuration) {
+          if (starheartAnimId) cancelAnimationFrame(starheartAnimId);
+          c.style.display = 'none';
           goToStage('hero');
           return;
         }
 
-        requestAnimationFrame(animate);
+        starheartAnimId = requestAnimationFrame(animate);
       }
 
       // Clear canvas and start
@@ -1780,9 +1806,12 @@
         dragListenersAttached = true;
       }
 
-      $('#nextCardBtn').onclick = () => swipeTopCard();
-      $('#resetStackBtn').onclick = () => resetAlbum();
-      $('#albumContinueBtn').onclick = () => goToStage('card');
+      const nextBtn = $('#nextCardBtn');
+      if (nextBtn) nextBtn.onclick = () => swipeTopCard();
+      const resetBtn = $('#resetStackBtn');
+      if (resetBtn) resetBtn.onclick = () => resetAlbum();
+      const contBtn = $('#albumContinueBtn');
+      if (contBtn) contBtn.onclick = () => goToStage('card');
     }
 
     /**
@@ -2022,19 +2051,23 @@
 
       // Re-trigger card animation
       const card = $('.envelope-card');
-      card.style.animation = 'none'; card.offsetHeight; card.style.animation = '';
+      if (card) { card.style.animation = 'none'; card.offsetHeight; card.style.animation = ''; }
 
-      $('#cardContinueBtn').onclick = () => goToStage('secret');
+      const contBtn = $('#cardContinueBtn');
+      if (contBtn) contBtn.onclick = () => goToStage('secret');
     }
 
     /* ═══════════════════════════════════════════════════
        STAGE 7 — SECRET PASSCODE
        ═══════════════════════════════════════════════════ */
     function initSecret() {
-      $('#secretTitle').textContent = birthdayConfig.secretTitle;
+      const title = $('#secretTitle');
+      if (title) title.textContent = birthdayConfig.secretTitle;
       const inputs = $$('#passcodeInput input');
+      if (!inputs || !inputs.length) return;
+
       inputs.forEach(inp => { inp.value = ''; inp.classList.remove('shake'); });
-      inputs[0].focus();
+      if (inputs[0]) inputs[0].focus();
 
       inputs.forEach((inp, i) => {
         inp.oninput = () => {
@@ -2062,11 +2095,13 @@
         burstParticles();
         setTimeout(() => goToStage('video'), 800);
       } else {
-        inputs.forEach(inp => {
-          inp.classList.add('shake');
-          setTimeout(() => { inp.classList.remove('shake'); inp.value = ''; }, 600);
-        });
-        setTimeout(() => inputs[0].focus(), 700);
+        if (inputs && inputs.length) {
+          inputs.forEach(inp => {
+            inp.classList.add('shake');
+            setTimeout(() => { inp.classList.remove('shake'); inp.value = ''; }, 600);
+          });
+          setTimeout(() => { if (inputs[0]) inputs[0].focus(); }, 700);
+        }
       }
     }
 
@@ -2100,7 +2135,8 @@
     function initVideo() {
       // YouTube iframe player embedded in video wrapper.
       // Action button advances to final stage.
-      $('#videoSkipBtn').onclick = () => goToStage('final');
+      const skipBtn = $('#videoSkipBtn');
+      if (skipBtn) skipBtn.onclick = () => goToStage('final');
     }
 
     /* ═══════════════════════════════════════════════════
@@ -2115,28 +2151,33 @@
       const caption = $('#lightboxCaption');
       const details = $('#lightboxDetails');
 
-      img.src = photo.image;
-      img.alt = photo.caption;
-      caption.textContent = photo.caption;
-      details.textContent = photo.details || '';
+      if (img) { img.src = photo.image; img.alt = photo.caption; }
+      if (caption) caption.textContent = photo.caption;
+      if (details) details.textContent = photo.details || '';
 
-      overlay.classList.add('open');
+      if (overlay) overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
 
     function closeLightbox() {
       const overlay = $('#lightbox');
-      overlay.classList.remove('open');
+      if (overlay) overlay.classList.remove('open');
       document.body.style.overflow = '';
     }
 
     // Close on overlay click (not on container)
-    $('#lightbox').addEventListener('click', (e) => {
-      if (e.target === $('#lightbox')) closeLightbox();
-    });
+    const lightboxOverlay = $('#lightbox');
+    if (lightboxOverlay) {
+      lightboxOverlay.addEventListener('click', (e) => {
+        if (e.target === lightboxOverlay) closeLightbox();
+      });
+    }
 
     // Close button
-    $('#lightboxClose').addEventListener('click', closeLightbox);
+    const lightboxCloseBtn = $('#lightboxClose');
+    if (lightboxCloseBtn) {
+      lightboxCloseBtn.addEventListener('click', closeLightbox);
+    }
 
     // Escape key
     document.addEventListener('keydown', (e) => {
@@ -2154,31 +2195,37 @@
     const letterClose = $('#letterClose');
 
     function openLetter() {
-      letterOverlay.classList.add('active');
+      if (letterOverlay) letterOverlay.classList.add('active');
     }
 
     function closeLetter() {
-      letterOverlay.classList.remove('active');
+      if (letterOverlay) letterOverlay.classList.remove('active');
     }
 
     // Open on click
-    envelopeBtn.addEventListener('click', openLetter);
+    if (envelopeBtn) {
+      envelopeBtn.addEventListener('click', openLetter);
 
-    // Open on Enter/Space for keyboard accessibility
-    envelopeBtn.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openLetter();
-      }
-    });
+      // Open on Enter/Space for keyboard accessibility
+      envelopeBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openLetter();
+        }
+      });
+    }
 
     // Close button
-    letterClose.addEventListener('click', closeLetter);
+    if (letterClose) {
+      letterClose.addEventListener('click', closeLetter);
+    }
 
     // Close on overlay click (outside card)
-    letterOverlay.addEventListener('click', (e) => {
-      if (e.target === letterOverlay) closeLetter();
-    });
+    if (letterOverlay) {
+      letterOverlay.addEventListener('click', (e) => {
+        if (e.target === letterOverlay) closeLetter();
+      });
+    }
 
     /* ═══════════════════════════════════════════════════
        POPULATE DYNAMIC CONTENT ON LOAD
