@@ -233,38 +233,17 @@
     }
 
     /* ═══════════════════════════════════════════════════
-   STAGE 3 — LETTER REVEAL
+   STAGE 2b — STAR-HEART SEQUENCE
    ═══════════════════════════════════════════════════ */
-    #stage-letters {
-      flex-direction: column;
-      gap: 10px;
+    #stage-starheart {
+      z-index: 14;
     }
 
-    .letter-row {
-      display: flex;
-      justify-content: center;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-
-    .reveal-letter {
-      font-family: var(--font-script);
-      font-size: clamp(2.5rem, 8vw, 5rem);
-      color: var(--pink);
-      display: inline-block;
-      opacity: 0;
-      transform: translateY(40px) rotateX(90deg);
-      transition: all .5s var(--ease);
-      text-shadow: 0 0 30px var(--pink-glow);
-    }
-
-    .reveal-letter.visible {
-      opacity: 1;
-      transform: translateY(0) rotateX(0deg);
-    }
-
-    .reveal-letter.space {
-      width: 20px;
+    #starheartCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
     }
 
     /* ═══════════════════════════════════════════════════
@@ -797,6 +776,12 @@
       box-shadow: 0 20px 60px rgba(0, 0, 0, .6), 0 10px 30px rgba(255, 77, 109, .25);
       background: #0a0a12;
       aspect-ratio: 16 / 9;
+      transition: box-shadow .4s, transform .4s var(--ease);
+    }
+
+    .video-wrapper:hover {
+      transform: scale(1.01);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .65), 0 12px 36px rgba(255, 77, 109, .35);
     }
 
     .video-wrapper iframe {
@@ -804,47 +789,6 @@
       height: 100%;
       border: none;
       display: block;
-    }
-
-    /* Thumbnail cover overlay */
-    .video-cover {
-      position: absolute;
-      inset: 0;
-      cursor: pointer;
-      z-index: 2;
-      background-size: cover;
-      background-position: center;
-      transition: opacity .4s var(--ease);
-    }
-
-    .video-cover::after {
-      content: '▶';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: rgba(255, 77, 109, .85);
-      color: #fff;
-      font-size: 1.8rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding-left: 4px;
-      box-shadow: 0 0 30px var(--pink-glow), 0 8px 24px rgba(0, 0, 0, .4);
-      transition: transform .3s, background .3s;
-    }
-
-    .video-cover:hover::after {
-      transform: translate(-50%, -50%) scale(1.1);
-      background: rgba(255, 77, 109, 1);
-    }
-
-    .video-cover.hidden {
-      opacity: 0;
-      pointer-events: none;
     }
 
     .video-fallback {
@@ -978,8 +922,15 @@
     }
 
     @keyframes envelopeFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
     }
 
     /* ── Letter Modal Overlay ── */
@@ -1174,11 +1125,9 @@
     <div class="countdown-num" id="countdownNum">3</div>
   </div>
 
-  <!-- STAGE 3: Letter Reveal -->
-  <div id="stage-letters" class="stage">
-    <div class="letter-row" id="lettersRow1"></div>
-    <div class="letter-row" id="lettersRow2"></div>
-    <div class="letter-row" id="lettersRow3"></div>
+  <!-- STAGE 2b: Star-Heart Sequence -->
+  <div id="stage-starheart" class="stage">
+    <canvas id="starheartCanvas"></canvas>
   </div>
 
   <!-- STAGE 4: Hero -->
@@ -1233,25 +1182,14 @@
   <!-- STAGE 8: Video -->
   <div id="stage-video" class="stage">
     <div class="video-wrapper" id="videoWrapper">
-      <iframe id="birthdayVideo"
-        src="https://www.youtube.com/embed/Z4KOqQzz4m0"
-        title="Happy Birthday My True Love"
+      <iframe id="birthdayVideo" src="https://www.youtube.com/embed/Z4KOqQzz4m0" title="Happy Birthday My True Love"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen>
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
       </iframe>
-      <div class="video-cover" id="videoCover" style="background-image: url('./images/thumbnail.jpg')"></div>
-    </div>
-    <div class="video-fallback-msg" id="videoFallbackMsg" style="display:none;">
-      <div style="text-align:center; padding:40px 20px;">
-        <div style="font-size:3rem; margin-bottom:16px;">🎬</div>
-        <p style="font-family:var(--font-hand); font-size:1.2rem; color:var(--pink-soft); margin-bottom:8px;">A special
-          video is on its way...</p>
-      </div>
     </div>
     <div class="video-skip">
-      <button class="cta-btn" id="videoSkipBtn">Continue ❤️</button>
+      <button class="cta-btn" id="videoSkipBtn">Continue 💖</button>
     </div>
   </div>
 
@@ -1306,9 +1244,7 @@
       birthDate: "0510",
       subtitle: "Today is all about you ❤️",
       birthdayMessage: "Happy 24th Birthday Yara! Wishing you a year filled with endless laughter, love, and all the magic you bring to the world.",
-      secretTitle: "A Secret For You ❤️",
-      videoUrl: "https://www.youtube.com/embed/Z4KOqQzz4m0",
-      thumbnailUrl: "./images/thumbnail.jpg"
+      secretTitle: "A Secret For You ❤️"
     };
 
     const photos = [
@@ -1351,7 +1287,7 @@
     let transitioning = false;
 
     const stages = [
-      'matrix', 'countdown', 'letters', 'hero', 'album', 'card', 'secret', 'video', 'final'
+      'matrix', 'countdown', 'starheart', 'hero', 'album', 'card', 'secret', 'video', 'final'
     ];
 
     /* ═══════════════════════════════════════════════════
@@ -1376,7 +1312,7 @@
         transitioning = false;
 
         if (name === 'countdown') runCountdown();
-        if (name === 'letters') runLetterReveal();
+        if (name === 'starheart') runStarHeart();
         if (name === 'hero') initHero();
         if (name === 'album') initAlbum();
         if (name === 'card') initCard();
@@ -1454,36 +1390,84 @@
     (function initMatrix() {
       const c = $('#matrixCanvas');
       const ctx = c.getContext('2d');
-      let cols, drops;
-      const chars = '❤️♡YARA2405HAPPYLOVEBIRTHDAY✨💕01'.split('');
-      const fontSize = 16;
+      const fontSize = 22;
+      const colGap = 32;       // horizontal spacing between columns
+      const rowStep = 1.5;     // vertical spacing multiplier (1.5 × fontSize between letters)
+      let cols, columns;
+
+      // Phrases — clean English letters only
+      const phrases = [
+        'HAPPY BIRTHDAY YARA',
+        'YARA',
+        'HAPPY BIRTHDAY',
+        'BIRTHDAY YARA',
+        'HAPPY YARA',
+      ];
+
+      function createColumn(index) {
+        const phrase = phrases[index % phrases.length];
+        const chars = [...phrase];
+        return {
+          chars,
+          charIndex: Math.floor(Math.random() * chars.length),
+          y: Math.random() * -50,
+          speed: 0.08 + Math.random() * 0.08, // very gentle: 0.08–0.16
+        };
+      }
 
       function resize() {
         c.width = innerWidth;
         c.height = innerHeight;
-        cols = Math.ceil(c.width / fontSize);
-        drops = Array.from({ length: cols }, () => Math.random() * -100);
+        const newCols = Math.floor(c.width / colGap);
+        if (!columns || newCols !== cols) {
+          columns = Array.from({ length: newCols }, (_, i) => createColumn(i));
+        }
+        cols = newCols;
       }
       resize();
       addEventListener('resize', resize);
 
       function draw() {
         if (currentStage !== 'matrix') { requestAnimationFrame(draw); return; }
-        ctx.fillStyle = 'rgba(5,5,8,.06)';
+
+        // Very slow fade — long soft trails
+        ctx.fillStyle = 'rgba(5, 5, 8, 0.03)';
         ctx.fillRect(0, 0, c.width, c.height);
 
         for (let i = 0; i < cols; i++) {
-          const ch = chars[Math.random() * chars.length | 0];
-          const x = i * fontSize;
-          const y = drops[i] * fontSize;
+          const col = columns[i];
+          const ch = col.chars[col.charIndex];
+          const x = i * colGap + (colGap - fontSize) / 2; // center char in its column
+          const y = col.y * fontSize * rowStep;
 
-          const hue = 340 + Math.random() * 30;
-          ctx.fillStyle = `hsla(${hue},90%,${60 + Math.random() * 20}%,${.6 + Math.random() * .4})`;
-          ctx.font = `${fontSize}px var(--font-body)`;
+          // Romantic pink/red hue range
+          const hue = 330 + Math.random() * 30;
+          const lightness = 55 + Math.random() * 20;
+          const alpha = 0.65 + Math.random() * 0.35;
+
+          // Soft glow
+          ctx.shadowColor = `hsla(${hue}, 100%, 65%, 0.5)`;
+          ctx.shadowBlur = 10;
+          ctx.fillStyle = `hsla(${hue}, 90%, ${lightness}%, ${alpha})`;
+          ctx.font = `bold ${fontSize}px var(--font-body)`;
           ctx.fillText(ch, x, y);
+          ctx.shadowBlur = 0;
 
-          if (y > c.height && Math.random() > .975) drops[i] = 0;
-          drops[i] += .6;
+          // Advance to next character in the phrase
+          col.charIndex = (col.charIndex + 1) % col.chars.length;
+          col.y += col.speed;
+
+          // Reset when past the bottom
+          if (y > c.height + 60) {
+            col.y = Math.random() * -40;
+            col.speed = 0.08 + Math.random() * 0.08;
+            // Occasionally switch to a different phrase
+            if (Math.random() > 0.5) {
+              const newPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+              col.chars = [...newPhrase];
+              col.charIndex = 0;
+            }
+          }
         }
         requestAnimationFrame(draw);
       }
@@ -1518,7 +1502,7 @@
         setTimeout(() => {
           n--;
           if (n <= 0) {
-            goToStage('letters');
+            goToStage('starheart');
             return;
           }
           el.textContent = n;
@@ -1532,33 +1516,205 @@
     }
 
     /* ═══════════════════════════════════════════════════
-       STAGE 3 — LETTER REVEAL
+       STAGE 2b — STAR-HEART SEQUENCE
        ═══════════════════════════════════════════════════ */
-    function runLetterReveal() {
-      const words = ['HAPPY', 'BIRTHDAY', birthdayConfig.revealName.toUpperCase()];
-      const rows = [$('#lettersRow1'), $('#lettersRow2'), $('#lettersRow3')];
+    function runStarHeart() {
+      const c = $('#starheartCanvas');
+      const ctx = c.getContext('2d');
+      c.width = innerWidth;
+      c.height = innerHeight;
 
-      rows.forEach(r => r.innerHTML = '');
+      const cx = c.width / 2;
+      const cy = c.height / 2;
+      const scale = Math.min(c.width, c.height) * 0.006;
 
-      const allLetters = [];
+      // --- Generate heart outline points (finer resolution) ---
+      const heartPoints = [];
+      for (let a = 0; a < Math.PI * 2; a += 0.04) {
+        const x = 16 * Math.pow(Math.sin(a), 3);
+        const y = -(13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a));
+        heartPoints.push({ x: cx + x * scale, y: cy + y * scale - 20 });
+      }
 
-      words.forEach((word, wi) => {
-        for (let i = 0; i < word.length; i++) {
-          const span = document.createElement('span');
-          span.className = 'reveal-letter';
-          span.textContent = word[i];
-          rows[wi].appendChild(span);
-          allLetters.push(span);
+      // --- Generate text points for "Love You Yara" ---
+      const textPoints = [];
+      (function sampleText() {
+        const offscreen = document.createElement('canvas');
+        const offCtx = offscreen.getContext('2d');
+        offscreen.width = c.width;
+        offscreen.height = c.height;
+        const textSize = Math.min(c.width * 0.06, 38);
+        offCtx.font = `bold ${textSize}px 'Dancing Script', cursive`;
+        offCtx.textAlign = 'center';
+        offCtx.textBaseline = 'middle';
+        offCtx.fillStyle = '#fff';
+        offCtx.fillText('Love You Yara', cx, cy + 10);
+
+        const imgData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height);
+        const step = 4;
+        for (let py = 0; py < offscreen.height; py += step) {
+          for (let px = 0; px < offscreen.width; px += step) {
+            if (imgData.data[(py * offscreen.width + px) * 4 + 3] > 128) {
+              textPoints.push({ x: px, y: py });
+            }
+          }
         }
+      })();
+
+      // --- Create star particles ---
+      const stars = [];
+
+      // Heart outline stars — all start immediately, no staggered delay
+      heartPoints.forEach((pt) => {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 300 + Math.random() * 400;
+        stars.push({
+          targetX: pt.x, targetY: pt.y,
+          x: cx + Math.cos(angle) * dist,
+          y: cy + Math.sin(angle) * dist,
+          size: 2.5 + Math.random() * 2,
+          alpha: 0,
+          phase: 'gather-heart',
+          hue: 335 + Math.random() * 35,
+          vx: 0, vy: 0,
+        });
       });
 
-      let delay = 200;
-      allLetters.forEach((span, i) => {
-        setTimeout(() => span.classList.add('visible'), delay + i * 120);
+      // Text stars — will activate later
+      textPoints.forEach((pt) => {
+        stars.push({
+          targetX: pt.x, targetY: pt.y,
+          x: cx + (Math.random() - 0.5) * 400,
+          y: cy + (Math.random() - 0.5) * 400,
+          size: 1.8 + Math.random() * 1.5,
+          alpha: 0,
+          phase: 'wait-text',
+          hue: 35 + Math.random() * 25, // golden
+          vx: 0, vy: 0,
+        });
       });
 
-      // Move to hero after all letters + pause
-      setTimeout(() => goToStage('hero'), delay + allLetters.length * 120 + 1400);
+      // --- Timing (at 60fps) ---
+      //   0–480:   Heart particles gather (~8s to fully form)
+      // 300–600:   Text particles gather (start while heart is mostly formed)
+      // 600–840:   Hold completed heart + text stable (~4s)
+      //     840:   Burst trigger
+      // 840–960:   Explosion (~2s)
+      let frame = 0;
+      const heartFormFrames = 300;   // رسم القلب في 5 ثوانٍ بدلاً من 8
+      const textStartFrame = 180;    // بداية رسم النص أسرع[cite: 7]
+      const textFormFrames = 200;    // سرعة تشكيل النص[cite: 7]
+      const holdEndFrame = 400;      // مدة ثبات القلب الإجمالية (10 ثوانٍ إجمالاً قبل الانفجار)[cite: 7]
+      const burstDuration = 90;      // سرعة الانفجار[cite: 7]
+      let bursting = false;
+      let burstStartFrame = 0;
+
+      function drawStar(x, y, size, alpha, hue) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.shadowColor = `hsla(${hue}, 100%, 70%, 0.8)`;
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = `hsla(${hue}, 90%, 75%, 1)`;
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+          const r = i % 2 === 0 ? size : size * 0.4;
+          const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
+          const sx = x + Math.cos(angle) * r;
+          const sy = y + Math.sin(angle) * r;
+          i === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function animate() {
+        frame++;
+
+        // Minimal fade to keep particles bright and persistent
+        ctx.fillStyle = 'rgba(5, 5, 8, 0.08)';
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        // --- Trigger burst ---
+        if (!bursting && frame >= holdEndFrame) {
+          bursting = true;
+          burstStartFrame = frame;
+          stars.forEach(s => {
+            const angle = Math.atan2(s.y - cy, s.x - cx) + (Math.random() - 0.5) * 1.0;
+            const speed = 4 + Math.random() * 10;
+            s.vx = Math.cos(angle) * speed;
+            s.vy = Math.sin(angle) * speed;
+            s.phase = 'burst';
+          });
+        }
+
+        // --- Update each particle ---
+        for (const s of stars) {
+          if (s.phase === 'gather-heart') {
+            // Smooth direct lerp toward target
+            const t = Math.min(frame / heartFormFrames, 1);
+            const lerp = 0.04 + t * 0.04; // accelerates slightly as it converges
+            s.x += (s.targetX - s.x) * lerp;
+            s.y += (s.targetY - s.y) * lerp;
+            s.alpha = Math.min(frame / 60, 1); // fade in over first second
+            // Snap when close enough
+            if (Math.abs(s.x - s.targetX) < 0.5 && Math.abs(s.y - s.targetY) < 0.5) {
+              s.x = s.targetX;
+              s.y = s.targetY;
+              s.alpha = 1;
+              s.phase = 'hold';
+            }
+          } else if (s.phase === 'wait-text') {
+            if (frame >= textStartFrame) {
+              s.phase = 'gather-text';
+            }
+          } else if (s.phase === 'gather-text') {
+            const elapsed = frame - textStartFrame;
+            const t = Math.min(elapsed / textFormFrames, 1);
+            const lerp = 0.03 + t * 0.05;
+            s.x += (s.targetX - s.x) * lerp;
+            s.y += (s.targetY - s.y) * lerp;
+            s.alpha = Math.min(elapsed / 40, 1);
+            if (Math.abs(s.x - s.targetX) < 0.5 && Math.abs(s.y - s.targetY) < 0.5) {
+              s.x = s.targetX;
+              s.y = s.targetY;
+              s.alpha = 1;
+              s.phase = 'hold';
+            }
+          } else if (s.phase === 'hold') {
+            // Stable — just keep drawing at target position
+            s.alpha = 1;
+          } else if (s.phase === 'burst') {
+            s.x += s.vx;
+            s.y += s.vy;
+            s.vx *= 0.96;
+            s.vy *= 0.96;
+            s.vy += 0.06; // gravity
+            const elapsed = frame - burstStartFrame;
+            s.alpha = Math.max(0, 1 - elapsed / burstDuration);
+            s.size *= 0.994;
+          }
+
+          if (s.alpha > 0.01) {
+            // Gentle sparkle flicker
+            const flicker = 0.8 + Math.sin(frame * 0.25 + s.targetX * 0.5) * 0.2;
+            drawStar(s.x, s.y, s.size, s.alpha * flicker, s.hue);
+          }
+        }
+
+        // --- Check burst completion ---
+        if (bursting && (frame - burstStartFrame) > burstDuration) {
+          goToStage('hero');
+          return;
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      // Clear canvas and start
+      ctx.fillStyle = 'rgba(5, 5, 8, 1)';
+      ctx.fillRect(0, 0, c.width, c.height);
+      animate();
     }
 
     /* ═══════════════════════════════════════════════════
@@ -1942,53 +2098,9 @@
        STAGE 8 — VIDEO
        ═══════════════════════════════════════════════════ */
     function initVideo() {
-      const wrapper = $('#videoWrapper');
-      const iframe = $('#birthdayVideo');
-      const cover = $('#videoCover');
-      const fallback = $('#videoFallbackMsg');
-
-      const url = birthdayConfig.videoUrl;
-
-      // Default: show player, hide fallback
-      wrapper.style.display = '';
-      fallback.style.display = 'none';
-
-      // If no URL configured, show fallback
-      if (!url) {
-        showVideoFallback();
-        return;
-      }
-
-      // Set iframe src from config (without autoplay initially)
-      iframe.src = url;
-
-      // Set thumbnail from config
-      if (cover && birthdayConfig.thumbnailUrl) {
-        cover.style.backgroundImage = `url('${birthdayConfig.thumbnailUrl}')`;
-      }
-
-      // Clicking the thumbnail cover starts autoplay and hides cover
-      if (cover) {
-        cover.addEventListener('click', () => {
-          // Append autoplay param to iframe src
-          const sep = iframe.src.includes('?') ? '&' : '?';
-          iframe.src = iframe.src + sep + 'autoplay=1';
-          cover.classList.add('hidden');
-        });
-      }
-
-      // Skip button always available
-      $('#videoSkipBtn').onclick = () => {
-        iframe.src = ''; // stop playback
-        goToStage('final');
-      };
-    }
-
-    function showVideoFallback() {
-      const wrapper = $('#videoWrapper');
-      const fallback = $('#videoFallbackMsg');
-      wrapper.style.display = 'none';
-      fallback.style.display = 'block';
+      // YouTube iframe player embedded in video wrapper.
+      // Action button advances to final stage.
+      $('#videoSkipBtn').onclick = () => goToStage('final');
     }
 
     /* ═══════════════════════════════════════════════════
